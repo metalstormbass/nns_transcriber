@@ -1,0 +1,39 @@
+version: 1
+
+# Workload identity: lets specific checks pull Python packages through
+# Chainguard Libraries (libraries.cgr.dev) with no credential in the VM —
+# the platform injects it on requests to the listed host.
+identities:
+  libraries-pull:
+    description: Pull Python deps through Chainguard Libraries (CHAINGUARD_AND_UPSTREAM).
+    checks:
+      - tests.checks.deps
+      - tests.checks.smoke
+      - release.checks.deep-audit
+    audiences:
+      - libraries.cgr.dev
+    allow:
+      - run: presubmit
+        target_ref: refs/heads/main
+    chainguard:
+      libraries.cgr.dev:
+        identity: a8cae4933a02f321aab564b94317461940499c01/c804ad57f6f30ec1
+        exchange_audience: libraries.cgr.dev
+        role: libraries.python.pull
+        # Scope the exchanged token to the mikeco.com org
+        scopes: [a8cae4933a02f321aab564b94317461940499c01]
+    # Ring 1.team = postsubmit runs plus PRs OPENED by the authors below.
+    # Without a trust block, every open PR — including forks — would get
+    # this identity.
+    ring: 1.team
+
+trust:
+  github_token: 2
+  groups:
+    maintainers:
+      github:
+        user:
+          metalstormbass: 26266180
+  subrings:
+    team:
+      authors: [maintainers]
