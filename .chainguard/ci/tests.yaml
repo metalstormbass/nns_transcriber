@@ -72,5 +72,5 @@ checks:
     script: |
       python3 -m venv /var/tmp/venv
       . /var/tmp/venv/bin/activate
-      pip install --quiet -r freeze.txt
+      pip install --quiet -r frozen/freeze.txt
       python -c "from PySide6 import QtCore; print('Qt', QtCore.qVersion(), 'on', '$QT_QPA_PLATFORM')"
