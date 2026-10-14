@@ -25,17 +25,17 @@ checks:
       PR_NUMBER: "${{ context.github.pull_request.number }}"
     outputs:
       frozen:
-        path: freeze.txt
+        path: frozen
     shell: bash
     script: |
       python3 -m venv /var/tmp/venv
       . /var/tmp/venv/bin/activate
       pip install --quiet -r requirements.txt
-      pip freeze > freeze.txt
+      pip freeze > frozen/freeze.txt
       echo "::sandbox-summary::"
       echo "### Dependency freeze (PR #${PR_NUMBER:-n/a})"
       echo '```'
-      cat freeze.txt
+      cat frozen/freeze.txt
       echo '```'
       echo "::end-sandbox-summary::"
 
@@ -50,7 +50,7 @@ checks:
     advisory: true
     needs: [deps]
     inputs:
-      - path: freeze.txt
+      - path: frozen
         from:
           check: deps
           output: frozen
