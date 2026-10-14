@@ -1,0 +1,18 @@
+version: 1
+
+# Named environment for checks that import PySide6/Qt: adds the system
+# libraries Qt's headless platform plugins want. A check opts in with
+# `environment: qt`.
+environment:
+  packages:
+    - python-3.13
+    - py3.13-pip
+    - bash
+    - git
+    - coreutils
+    - fontconfig
+    - freetype
+    - libxkbcommon
+  vars:
+    PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    PYTHONUNBUFFERED: "1"

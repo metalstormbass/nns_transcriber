@@ -1,0 +1,24 @@
+version: 1
+
+checks:
+  # On-request check: never runs automatically. Add the GitHub label
+  # `ci/run:deep-audit` to a PR (or let the requested-checks agent
+  # suggest it) to run it. Requested checks must carry a description;
+  # `docs:` points at a Markdown file next to this one that the agent
+  # and humans can read.
+  deep-audit:
+    description: Full dependency install plus pip-audit CVE scan of requirements.txt.
+    docs: deep-audit.md
+    when:
+      requested: true
+    timeout: 30m
+    network:
+      egress:
+        - pypi.org
+        - files.pythonhosted.org
+    shell: bash
+    script: |
+      python3 -m venv /var/tmp/venv
+      . /var/tmp/venv/bin/activate
+      pip install --quiet -r requirements.txt pip-audit
+      pip-audit -r requirements.txt --strict
