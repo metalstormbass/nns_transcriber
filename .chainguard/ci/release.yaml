@@ -11,6 +11,7 @@ checks:
     docs: deep-audit.md
     when:
       requested: true
+    resources: big-amd64
     timeout: 30m
     network:
       egress:
