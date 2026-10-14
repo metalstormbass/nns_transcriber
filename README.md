@@ -1,23 +1,31 @@
-# NNS Transcriber
+# MCCP
 
-A small desktop transcription workstation focused on Nashville Number System charts.
+A desktop chart utility for writing and previewing Nashville Number charts.
 
-## Current MVP
+## Project structure
 
-- Load WAV/MP3/M4A/FLAC/OGG/etc. through Qt Multimedia
-- Play/pause
-- Loop playback
-- Drag loop boundaries on the waveform
-- Variable playback speed control
-- Timestamped labeled markers
-- Keyboard shortcuts:
-  - Space = play/pause
-  - L = loop
-  - M = marker
-  - Left/right = seek
-- Editable NNS chart table
-- Save/open `.nns.json` projects
-- Export a Markdown chart suitable for Obsidian, Apple Notes, Notion, etc.
+```text
+nns_transcriber/
+  main.py
+  requirements.txt
+  transcriber/
+    __init__.py
+    app.py
+    main_window.py
+    constants.py
+```
+
+## Current behavior
+
+- Working-directory-based song library and project storage
+- Three-pane workflow: markdown editor, rendered preview, song library
+- Single link field per song (YouTube or Spotify)
+- Reader Mode toggle with `Esc` exit
+- Auto format toggle for bar spacing
+- Add/remove songs with buttons and right-click menu
+- Save Project As and export defaults to the working directory
+- Export rendered chart and raw markdown
+- Undo/redo with standard shortcuts
 
 ## macOS setup
 
@@ -33,13 +41,6 @@ python main.py
 
 If macOS says Python is missing, install a current Python from python.org or Homebrew.
 
-## Next development targets
+## Notes
 
-1. Decode the actual waveform instead of the placeholder waveform.
-2. Add a real spectrogram.
-3. Add pitch-preserving time stretching.
-4. Make chart cells semantic NNS objects instead of plain strings.
-5. Add sections/repeats/time signatures.
-6. Link every chart bar/chord to an audio time range.
-7. Add chord/key/BPM analysis.
-8. Add Obsidian/Markdown live project integration.
+- This project is chart-only and does not include audio decoding or analysis.
