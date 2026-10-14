@@ -17,12 +17,17 @@ checks:
     description: Install requirements.txt and publish the frozen set.
     resources: big-amd64
     timeout: 20m
+    # Workload identity (defined in identities.yaml): the platform injects
+    # a libraries.python.pull credential on requests to libraries.cgr.dev.
+    # Blobs 302-redirect to R2, so the redirect host needs egress too.
+    identity: libraries-pull
     network:
       egress:
-        - pypi.org
-        - files.pythonhosted.org
+        - libraries.cgr.dev
+        - 9236a389bd48b984df91adc1bc924620.r2.cloudflarestorage.com
     vars:
       PR_NUMBER: "${{ context.github.pull_request.number }}"
+      PIP_INDEX_URL: https://libraries.cgr.dev/python/simple/
     outputs:
       frozen:
         path: frozen
@@ -57,10 +62,13 @@ checks:
     resources: big-amd64
     timeout: 20m
     parallelism: 2
+    identity: libraries-pull
     network:
       egress:
-        - pypi.org
-        - files.pythonhosted.org
+        - libraries.cgr.dev
+        - 9236a389bd48b984df91adc1bc924620.r2.cloudflarestorage.com
+    vars:
+      PIP_INDEX_URL: https://libraries.cgr.dev/python/simple/
     foreach:
       - name: offscreen
         vars:
