@@ -22,18 +22,10 @@ identities:
         role: libraries.python.pull
         # Scope the exchanged token to the mikeco.com org
         scopes: [a8cae4933a02f321aab564b94317461940499c01]
-    # Ring 1.team = postsubmit runs plus PRs OPENED by the authors below.
-    # Without a trust block, every open PR — including forks — would get
-    # this identity.
-    ring: 1.team
-
-trust:
-  github_token: 2
-  groups:
-    maintainers:
-      github:
-        user:
-          metalstormbass: 26266180
-  subrings:
-    team:
-      authors: [maintainers]
+    # NOTE: no trust section for now — with the identity granted by the
+    # allow rules alone, every open PR targeting main (including forks)
+    # can use it. Acceptable here because the role is read-only package
+    # pulls. Re-add a trust block with rings once the beta supports it
+    # for this repo (a trust section with the required github_token key
+    # was rejected at exchange time with "base identity does not
+    # configure GitHub credentials").
