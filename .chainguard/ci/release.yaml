@@ -12,15 +12,10 @@ checks:
     when:
       requested: true
     timeout: 30m
-    identity: libraries-pull
     network:
       egress:
-        - libraries.cgr.dev
-        - 9236a389bd48b984df91adc1bc924620.r2.cloudflarestorage.com
-        # pip-audit queries PyPI's vulnerability API directly
         - pypi.org
-    vars:
-      PIP_INDEX_URL: https://libraries.cgr.dev/python/simple/
+        - files.pythonhosted.org
     shell: bash
     script: |
       python3 -m venv /var/tmp/venv
