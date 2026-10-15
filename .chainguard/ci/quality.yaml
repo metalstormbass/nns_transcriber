@@ -1,0 +1,47 @@
+version: 1
+
+checks:
+  # Blocking lint. Only runs when Python sources change (`when.changed`).
+  # Network is closed except the two hosts pip needs; a connection to any
+  # other host is refused but the check keeps running (policy: deny).
+  lint:
+    description: Ruff lint over main.py and the transcriber package.
+    when:
+      changed: ["**/*.py", ".chainguard/**"]
+    network:
+      egress:
+        - pypi.org
+        - files.pythonhosted.org
+      policy: deny
+    timeout: 10m
+    steps:
+      - name: install ruff
+        cmd: [python3, -m, pip, install, --user, --quiet, ruff]
+      - name: ruff check
+        shell: bash
+        # Gate on correctness rules only (pyflakes + pycodestyle errors);
+        # newer ruff defaults add opinionated style rules this codebase
+        # doesn't follow.
+        script: |
+          export PATH="$HOME/.local/bin:$PATH"
+          ruff check --select E4,E7,E9,F main.py transcriber
+
+  # Advisory formatter check: reports its real result with "(advisory)"
+  # but never fails the PR summary. `when.expr` is CEL over PR context —
+  # combined with `changed`, both must hold (AND). Skips draft PRs.
+  format:
+    description: Ruff formatter drift report (advisory, skipped on drafts).
+    advisory: true
+    when:
+      changed: ["**/*.py", ".chainguard/**"]
+      expr: "!context.github.pull_request.draft"
+    network:
+      egress:
+        - pypi.org
+        - files.pythonhosted.org
+    timeout: 10m
+    shell: bash
+    script: |
+      python3 -m pip install --user --quiet ruff
+      export PATH="$HOME/.local/bin:$PATH"
+      ruff format --check --diff main.py transcriber

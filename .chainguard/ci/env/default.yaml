@@ -1,0 +1,18 @@
+version: 1
+
+# Default environment for every check that doesn't pick a named one.
+# Base VM ships only BusyBox + GNU tar, so list everything you need.
+environment:
+  packages:
+    - python-3.13
+    - py3.13-pip
+    - bash
+    - git
+    - coreutils
+  vars:
+    PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    PYTHONUNBUFFERED: "1"
+
+# AI agent that suggests `ci/run:<check>` labels for on-request checks
+# based on what a PR touches. `comment` = suggest only; `agent` = apply labels.
+requested_checks_agent: comment

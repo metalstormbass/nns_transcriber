@@ -1,0 +1,76 @@
+version: 1
+
+checks:
+  # Simplest shape: a `cmd` list (no shell involved), no network at all.
+  # Runs on both PRs and pushes to the default branch (`trigger: both`).
+  compile:
+    description: Byte-compile every Python source file.
+    trigger: [presubmit, postsubmit]
+    cmd: [python3, -m, compileall, -q, main.py, transcriber]
+    timeout: 5m
+
+  # Resolves PySide6, publishes the frozen dependency set as an OUTPUT
+  # for downstream checks, binds the PR number from GitHub context into
+  # an env var, runs on the larger amd64 class, and posts a Markdown
+  # summary onto the GitHub check via ::sandbox-summary::.
+  deps:
+    description: Install requirements.txt and publish the frozen set.
+    resources: big-amd64
+    timeout: 20m
+    network:
+      egress:
+        - pypi.org
+        - files.pythonhosted.org
+    vars:
+      PR_NUMBER: "${{ context.github.pull_request.number }}"
+    outputs:
+      frozen:
+        path: frozen
+    shell: bash
+    script: |
+      python3 -m venv /var/tmp/venv
+      . /var/tmp/venv/bin/activate
+      pip install --quiet -r requirements.txt
+      pip freeze > frozen/freeze.txt
+      echo "::sandbox-summary::"
+      echo "### Dependency freeze (PR #${PR_NUMBER:-n/a})"
+      echo '```'
+      cat frozen/freeze.txt
+      echo '```'
+      echo "::end-sandbox-summary::"
+
+  # Fan-out: one fresh VM per `foreach` entry (two Qt headless platform
+  # plugins), throttled by `parallelism`. Consumes the `deps` output via
+  # `inputs.from`, orders itself after deps with `needs`, and uses the
+  # named `qt` environment for the extra system libraries. Advisory while
+  # the Qt-in-microVM story is proven out.
+  smoke:
+    description: Import PySide6 under each headless Qt platform plugin.
+    environment: qt
+    advisory: true
+    needs: [deps]
+    inputs:
+      - path: frozen
+        from:
+          check: deps
+          output: frozen
+    resources: big-amd64
+    timeout: 20m
+    parallelism: 2
+    network:
+      egress:
+        - pypi.org
+        - files.pythonhosted.org
+    foreach:
+      - name: offscreen
+        vars:
+          QT_QPA_PLATFORM: offscreen
+      - name: minimal
+        vars:
+          QT_QPA_PLATFORM: minimal
+    shell: bash
+    script: |
+      python3 -m venv /var/tmp/venv
+      . /var/tmp/venv/bin/activate
+      pip install --quiet -r frozen/freeze.txt
+      python -c "from PySide6 import QtCore; print('Qt', QtCore.qVersion(), 'on', '$QT_QPA_PLATFORM')"

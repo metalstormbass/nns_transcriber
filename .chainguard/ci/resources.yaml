@@ -1,0 +1,17 @@
+version: 1
+
+# Custom resource classes. Defining this file REPLACES the built-in
+# classes (small/medium/large), so `default` is mandatory and every class
+# referenced by a check must be defined here.
+resource_classes:
+  default:
+    cpus: 2
+    memory: 8Gi
+    disk: 14Gi
+  big-amd64:
+    cpus: 4
+    memory: 16Gi
+    disk: 40Gi
+    platform:
+      os: linux
+      architecture: amd64
